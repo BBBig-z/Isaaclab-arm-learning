@@ -1,0 +1,10 @@
+---
+description: 我需要迁移自己的模型到该项目中,我的项目运行环境在conda中的(isaaclab_env)
+globs: 用中文回答问题
+alwaysApply: true
+---
+
+# Your rule content
+
+- You can @ files here
+- You can use markdown but dont have to

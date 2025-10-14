@@ -1,0 +1,36 @@
+# ARM-T Reach任务（关节控制） - RSL-RL PPO配置
+# 用于直接训练（不使用WandB Sweep）
+
+# 基础配置
+seed: 42
+num_envs: 2048
+max_iterations: 1000
+save_interval: 500
+
+# Policy network
+init_noise_std: 0.2
+actor_hidden_dims: [128, 128]
+critic_hidden_dims: [128, 128]
+activation: "relu"
+
+# PPO algorithm
+num_steps_per_env: 24
+num_learning_epochs: 8
+num_mini_batches: 64
+learning_rate: 0.0004
+schedule: "adaptive"
+gamma: 0.99
+lam: 0.95
+entropy_coef: 0.005
+clip_param: 0.1
+desired_kl: 0.01
+max_grad_norm: 0.5
+value_loss_coef: 0.34
+use_clipped_value_loss: true
+
+# Empirical normalization
+empirical_normalization: true
+
+# Environment
+decimation: 2
+episode_length_s: 20.0

@@ -1,0 +1,94 @@
+# WandB Sweep配置 - ARM-T Reach-IK任务
+# 用于WandB超参数搜索
+
+program: scripts/rsl_rl/train_wandb_reach_ik.py
+command:
+  - ${env}
+  - python
+  - ${program}
+  - --headless
+  - ${args_no_hyphens}
+method: grid
+name: arm_t_reach_ik_rsl_rl_sweep
+metric:
+  goal: maximize
+  name: train/episode_reward_mean
+
+parameters:
+  task:
+    value: ARM-T-Reach-IK-v0
+    
+  seed:
+    value: 42
+
+  num_envs:
+    value: 2048
+
+  max_iterations:
+    value: 1000
+
+  save_interval:
+    value: 500
+
+  # Policy network
+  init_noise_std:
+    values: [0.3, 0.25, 0.35]
+
+  actor_hidden_dims:
+    value: [128, 128]
+
+  critic_hidden_dims:
+    value: [128, 128]
+
+  activation:
+    value: "relu"
+
+  # PPO algorithm
+  num_steps_per_env:
+    value: 24
+
+  num_learning_epochs:
+    value: 8
+
+  num_mini_batches:
+    value: 64
+
+  learning_rate:
+    values: [0.002, 0.001, 0.003]
+
+  schedule:
+    value: "adaptive"
+
+  gamma:
+    value: 0.99
+
+  lam:
+    value: 0.95
+
+  entropy_coef:
+    values: [0.005, 0.01, 0.001]
+
+  clip_param:
+    value: 0.1
+
+  desired_kl:
+    value: 0.01
+
+  max_grad_norm:
+    value: 0.5
+
+  value_loss_coef:
+    value: 0.34
+
+  use_clipped_value_loss:
+    value: true
+
+  empirical_normalization:
+    value: true
+
+  decimation:
+    value: 2
+
+  episode_length_s:
+    value: 20.0
+
