@@ -1,0 +1,155 @@
+--- git status ---
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   .cursor/rules/example.mdc
+	modified:   scripts/rsl_rl/play.py
+	modified:   scripts/rsl_rl/train.py
+	modified:   scripts/skrl/play.py
+	modified:   scripts/skrl/train.py
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	"ARM_T_\350\256\255\347\273\203\346\214\207\345\215\227.md"
+	analyze_pose_database.py
+	poses_with_collision_check.py
+	scripts/list_arm_t_envs.py
+	source/SO_100/arm_t/
+	source/SO_100/data/Robots/arm_t/
+	train_arm_t.sh
+	"\351\241\271\347\233\256\350\257\264\346\230\216\346\226\207\346\241\243.md"
+
+no changes added to commit (use "git add" and/or "git commit -a") 
+
+
+--- git diff ---
+diff --git a/.cursor/rules/example.mdc b/.cursor/rules/example.mdc
+index 7e25479..d3b5285 100644
+--- a/.cursor/rules/example.mdc
++++ b/.cursor/rules/example.mdc
+@@ -1,6 +1,6 @@
+ ---
+-description:
+-globs:
++description: 我需要迁移自己的模型到该项目中,我的项目运行环境在conda中的(isaaclab_env)
++globs: 用中文回答问题
+ alwaysApply: true
+ ---
+ 
+diff --git a/scripts/rsl_rl/play.py b/scripts/rsl_rl/play.py
+index a9a98e5..248eba0 100644
+--- a/scripts/rsl_rl/play.py
++++ b/scripts/rsl_rl/play.py
+@@ -59,11 +59,20 @@ simulation_app = app_launcher.app
+ """Rest everything follows."""
+ 
+ import os
++import sys
+ import time
+ 
++# 添加 arm_t 模块路径到 sys.path
++workspace_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
++arm_t_path = os.path.join(workspace_path, "source/SO_100")
++if arm_t_path not in sys.path:
++    sys.path.insert(0, arm_t_path)
++    print(f"[INFO] 已添加路径到 sys.path: {arm_t_path}")
++
+ import gymnasium as gym
+ import isaaclab_tasks  # noqa: F401
+ import SO_100.tasks  # noqa: F401
++import arm_t.tasks  # noqa: F401
+ import torch
+ from isaaclab.envs import (
+     DirectMARLEnv,
+@@ -76,25 +85,25 @@ from isaaclab.utils.assets import retrieve_file_path
+ from isaaclab.utils.dict import print_dict
+ from isaaclab.utils.pretrained_checkpoint import get_published_pretrained_checkpoint
+ from isaaclab_rl.rsl_rl import (
+-    RslRlBaseRunnerCfg,
++    RslRlOnPolicyRunnerCfg,
+     RslRlVecEnvWrapper,
+     export_policy_as_jit,
+     export_policy_as_onnx,
+ )
+ from isaaclab_tasks.utils import get_checkpoint_path
+ from isaaclab_tasks.utils.hydra import hydra_task_config
+-from rsl_rl.runners import DistillationRunner, OnPolicyRunner
++from rsl_rl.runners import OnPolicyRunner
+ 
+ 
+ @hydra_task_config(args_cli.task, args_cli.agent)
+-def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agent_cfg: RslRlBaseRunnerCfg):
++def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agent_cfg: RslRlOnPolicyRunnerCfg):
+     """Play with RSL-RL agent."""
+     # grab task name for checkpoint path
+     task_name = args_cli.task.split(":")[-1]
+     train_task_name = task_name.replace("-Play", "")
+ 
+     # override configurations with non-hydra CLI arguments
+-    agent_cfg: RslRlBaseRunnerCfg = cli_args.update_rsl_rl_cfg(agent_cfg, args_cli)
++    agent_cfg: RslRlOnPolicyRunnerCfg = cli_args.update_rsl_rl_cfg(agent_cfg, args_cli)
+     env_cfg.scene.num_envs = args_cli.num_envs if args_cli.num_envs is not None else env_cfg.scene.num_envs
+ 
+     # set the environment seed
+@@ -142,12 +151,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
+ 
+     print(f"[INFO]: Loading model checkpoint from: {resume_path}")
+     # load previously trained model
+-    if agent_cfg.class_name == "OnPolicyRunner":
+-        runner = OnPolicyRunner(env, agent_cfg.to_dict(), log_dir=None, device=agent_cfg.device)
+-    elif agent_cfg.class_name == "DistillationRunner":
+-        runner = DistillationRunner(env, agent_cfg.to_dict(), log_dir=None, device=agent_cfg.device)
+-    else:
+-        raise ValueError(f"Unsupported runner class: {agent_cfg.class_name}")
++    runner = OnPolicyRunner(env, agent_cfg.to_dict(), log_dir=None, device=agent_cfg.device)
+     runner.load(resume_path)
+ 
+     # obtain the trained policy for inference
+@@ -178,7 +182,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
+     dt = env.unwrapped.step_dt
+ 
+     # reset environment
+-    obs = env.get_observations()
++    obs, _ = env.get_observations()
+     timestep = 0
+     # simulate environment
+     while simulation_app.is_running():
+diff --git a/scripts/rsl_rl/train.py b/scripts/rsl_rl/train.py
+index e68f512..403617d 100644
+--- a/scripts/rsl_rl/train.py
++++ b/scripts/rsl_rl/train.py
+@@ -80,6 +80,7 @@ from datetime import datetime
+ import gymnasium as gym
+ import isaaclab_tasks  # noqa: F401
+ import SO_100.tasks  # noqa: F401
++import arm_t.tasks  # noqa: F401
+ import torch
+ from isaaclab.envs import (
+     DirectMARLEnv,
+diff --git a/scripts/skrl/play.py b/scripts/skrl/play.py
+index 42d334d..d5e9012 100644
+--- a/scripts/skrl/play.py
++++ b/scripts/skrl/play.py
+@@ -89,6 +89,7 @@ elif args_cli.ml_framework.startswith("jax"):
+ 
+ import isaaclab_tasks  # noqa: F401
+ import SO_100.tasks  # noqa: F401
++import arm_t.tasks  # noqa: F401
+ from isaaclab.envs import DirectMARLEnv, multi_agent_to_single_agent
+ from isaaclab.utils.dict import print_dict
+ from isaaclab.utils.pretrained_checkpoint import get_published_pretrained_checkpoint
+diff --git a/scripts/skrl/train.py b/scripts/skrl/train.py
+index 2c097e9..1a7979f 100644
+--- a/scripts/skrl/train.py
++++ b/scripts/skrl/train.py
+@@ -82,6 +82,7 @@ elif args_cli.ml_framework.startswith("jax"):
+ 
+ import isaaclab_tasks  # noqa: F401
+ import SO_100.tasks  # noqa: F401
++import arm_t.tasks  # noqa: F401
+ from isaaclab.envs import (
+     DirectMARLEnv,
+     DirectMARLEnvCfg,
