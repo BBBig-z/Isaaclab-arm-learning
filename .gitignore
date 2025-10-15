@@ -209,4 +209,5 @@ __marimo__/
 # Isaac Arm 项目特定忽略
 logs/                              # 训练日志目录
 outputs/                           # 输出目录
+wandb/                             # WandB 日志目录
 source/ARM/data/Robots/arm_t/      # 机器人数据目录
