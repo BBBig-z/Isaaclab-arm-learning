@@ -1,0 +1,33 @@
+# Cursor AI 功能忽略文件
+# 这些文件/目录将被排除在 Cursor 的自动完成、代码分析和搜索之外
+
+# 机器人数据文件（大文件）
+source/ARM/data/Robots/usd.tar.gz
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# 虚拟环境
+.env
+.venv
+env/
+venv/
+ENV/
+
+# IDE 配置
+.vscode/
+.idea/
+
+# 大型二进制文件
+*.pt
+*.usd
+*.STL
+*.stl
+*.wandb
+
+# TensorBoard 事件文件
+events.out.tfevents.*

@@ -207,7 +207,34 @@ marimo/_lsp/
 __marimo__/
 
 # Isaac Arm 项目特定忽略
-logs/                              # 训练日志目录
-outputs/                           # 输出目录
-wandb/                             # WandB 日志目录
-source/ARM/data/Robots/arm_t/      # 机器人数据目录
+
+# 训练日志和输出目录
+logs/
+outputs/
+wandb/
+Train_notes/
+
+# 机器学习模型和训练数据（二进制文件）
+*.pt                               # PyTorch 模型
+*.pth                              # PyTorch 模型
+*.pickle                           # Python pickle 文件
+*.h5                               # HDF5 文件
+*.ckpt                             # Checkpoint 文件
+
+# TensorBoard 日志（二进制文件）
+events.out.tfevents.*
+
+# 3D 模型文件（大型二进制文件）
+*.usd                              # USD 文件
+*.usda                             # USD ASCII
+*.usdc                             # USD Crate
+*.STL                              # STL 网格
+*.stl
+
+# WandB 特定文件
+*.wandb
+
+# 训练结果图片（可选，根据需要决定是否保留）
+# *.png
+# *.jpg
+# *.jpeg
