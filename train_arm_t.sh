@@ -213,6 +213,10 @@ else
 fi
 echo ""
 
+# 记录训练开始时间（用于后续识别本次训练产生的文件）
+TRAINING_START_TIME=$(date +%s)
+TRAINING_DATE=$(date +%Y-%m-%d)
+
 # 运行训练
 echo "开始训练..."
 echo "=========================================="
@@ -231,7 +235,99 @@ fi
 
 echo ""
 
-# 根据任务类型显示不同的提示信息
+# 查找本次训练产生的文件
+echo "=========================================="
+echo "清理训练文件"
+echo "=========================================="
+
+# 确定日志子目录
+case "$TASK_NAME" in
+    reach)
+        LOG_SUBDIR="arm_t_reach"
+        ;;
+    reach_ik)
+        LOG_SUBDIR="arm_t_reach_ik"
+        ;;
+    lift)
+        LOG_SUBDIR="arm_t_lift"
+        ;;
+    lift_ik)
+        LOG_SUBDIR="arm_t_lift_ik"
+        ;;
+esac
+
+# 查找在训练开始后创建的日志目录
+TRAIN_LOGS_DIRS=()
+if [ -d "logs/rsl_rl/${LOG_SUBDIR}" ]; then
+    while IFS= read -r -d '' dir; do
+        DIR_MTIME=$(stat -c %Y "$dir" 2>/dev/null || stat -f %m "$dir" 2>/dev/null)
+        if [ "$DIR_MTIME" -ge "$TRAINING_START_TIME" ]; then
+            TRAIN_LOGS_DIRS+=("$dir")
+        fi
+    done < <(find "logs/rsl_rl/${LOG_SUBDIR}" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null)
+fi
+
+# 查找在训练开始后创建的输出目录
+TRAIN_OUTPUT_DIRS=()
+if [ -d "outputs/${TRAINING_DATE}" ]; then
+    while IFS= read -r -d '' dir; do
+        DIR_MTIME=$(stat -c %Y "$dir" 2>/dev/null || stat -f %m "$dir" 2>/dev/null)
+        if [ "$DIR_MTIME" -ge "$TRAINING_START_TIME" ]; then
+            TRAIN_OUTPUT_DIRS+=("$dir")
+        fi
+    done < <(find "outputs/${TRAINING_DATE}" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null)
+fi
+
+# 显示找到的文件并询问是否保留
+if [ ${#TRAIN_LOGS_DIRS[@]} -gt 0 ] || [ ${#TRAIN_OUTPUT_DIRS[@]} -gt 0 ]; then
+    echo "本次训练产生的文件："
+    echo ""
+    
+    for dir in "${TRAIN_LOGS_DIRS[@]}"; do
+        SIZE=$(du -sh "$dir" 2>/dev/null | cut -f1)
+        echo "  📁 $dir ($SIZE)"
+    done
+    
+    for dir in "${TRAIN_OUTPUT_DIRS[@]}"; do
+        SIZE=$(du -sh "$dir" 2>/dev/null | cut -f1)
+        echo "  📁 $dir ($SIZE)"
+    done
+    
+    echo ""
+    echo -e "\033[1;33m是否保留本次训练内容？\033[0m"
+    echo "  输入 'y' 保留，其他任意键删除"
+    read -p "请选择 [y/N]: " -n 1 -r KEEP_TRAINING
+    echo ""
+    
+    if [[ ! $KEEP_TRAINING =~ ^[Yy]$ ]]; then
+        echo ""
+        echo -e "\033[1;33m正在删除本次训练文件...\033[0m"
+        
+        for dir in "${TRAIN_LOGS_DIRS[@]}"; do
+            echo "  删除: $dir"
+            rm -rf "$dir"
+        done
+        
+        for dir in "${TRAIN_OUTPUT_DIRS[@]}"; do
+            echo "  删除: $dir"
+            rm -rf "$dir"
+        done
+        
+        echo -e "\033[0;32m✓ 训练文件已删除\033[0m"
+        echo ""
+        exit 0
+    else
+        echo -e "\033[0;32m✓ 训练文件已保留\033[0m"
+        echo ""
+        echo "=========================================="
+        echo ""
+    fi
+else
+    echo "未找到本次训练产生的文件"
+    echo ""
+fi
+
+# 根据任务类型显示不同的提示信息（仅在保留文件时显示）
 case "$TASK_NAME" in
     reach)
         echo "日志位置: logs/rsl_rl/arm_t_reach/"

@@ -1,8 +1,5 @@
 # Cursor AI 功能忽略文件
-# 这些文件/目录将被排除在 Cursor 的自动完成、代码分析和搜索之外
-
-# 机器人数据文件（大文件）
-source/ARM/data/Robots/usd.tar.gz
+# 这些文件/目录将被排除在 Cursor 的自动完成、代码分析和搜索之外S
 
 # Python 缓存
 __pycache__/
@@ -17,6 +14,8 @@ __pycache__/
 env/
 venv/
 ENV/
+
+Train_notes/
 
 # IDE 配置
 .vscode/

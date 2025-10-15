@@ -147,7 +147,7 @@ class RewardsCfg:
     # 分段姿态惩罚：误差大时惩罚大，误差小时惩罚小
     end_effector_orientation_tracking = RewTerm(
         func=arm_mdp.orientation_command_error_piecewise,
-        weight=-2,  # 基础权重
+        weight=-3,  # 基础权重
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names=MISSING),
             "command_name": "ee_pose",
