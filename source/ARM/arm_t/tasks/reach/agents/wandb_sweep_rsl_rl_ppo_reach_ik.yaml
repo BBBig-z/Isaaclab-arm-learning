@@ -22,10 +22,10 @@ parameters:
     value: 42
 
   num_envs:
-    value: 2048
+    value: 4096
 
   max_iterations:
-    value: 1000
+    value: 3000
 
   save_interval:
     value: 500
@@ -35,15 +35,16 @@ parameters:
     values: [0.3, 0.25, 0.35]
 
   actor_hidden_dims:
-    value: [128, 128]
+    value: [512, 256, 128]
 
   critic_hidden_dims:
-    value: [128, 128]
+    value: [512, 256, 128]
 
   activation:
     value: "relu"
 
   # PPO algorithm
+  # 每个环境采样的步数（num_steps_per_env）：指每个环境在一次经验收集(rollout)中收集的时间步数量。设定这个值可以影响训练过程中每次迭代的数据量，是PPO收集经验的“步长”。
   num_steps_per_env:
     value: 24
 
@@ -51,7 +52,7 @@ parameters:
     value: 8
 
   num_mini_batches:
-    value: 64
+    value: 512
 
   learning_rate:
     values: [0.002, 0.001, 0.003]
@@ -60,7 +61,7 @@ parameters:
     value: "adaptive"
 
   gamma:
-    value: 0.99
+    value: 0.95
 
   lam:
     value: 0.95

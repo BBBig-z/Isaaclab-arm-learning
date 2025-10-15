@@ -135,19 +135,19 @@ class RewardsCfg:
 
     end_effector_position_tracking = RewTerm(
         func=mdp.position_command_error,
-        weight=-0.5,  # 原始权重（稳定训练的关键）
+        weight=-6,  # 原始权重（稳定训练的关键）
         params={"asset_cfg": SceneEntityCfg("robot", body_names=MISSING), "command_name": "ee_pose"},
     )
     end_effector_position_tracking_fine_grained = RewTerm(
         func=mdp.position_command_error_tanh,
-        weight=0.2,  # 提高精细位置奖励（0.1 → 0.28）
+        weight=2,  # 提高精细位置奖励（0.1 → 0.28）
         params={"asset_cfg": SceneEntityCfg("robot", body_names=MISSING), "std": 0.1, "command_name": "ee_pose"},
     )
     
     # 分段姿态惩罚：误差大时惩罚大，误差小时惩罚小
     end_effector_orientation_tracking = RewTerm(
         func=arm_mdp.orientation_command_error_piecewise,
-        weight=-0.25,  # 基础权重
+        weight=-2,  # 基础权重
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names=MISSING),
             "command_name": "ee_pose",
@@ -161,14 +161,14 @@ class RewardsCfg:
     action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.0001)  # 原始权重
     joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
-        weight=-0.002,  # 原始权重
+        weight=-0.02,  # 原始权重
         params={"asset_cfg": SceneEntityCfg("robot")},
     )
     
     # 保持目标奖励 - 鼓励在目标位置保持稳定
     target_hold_bonus = RewTerm(
         func=arm_mdp.target_hold_bonus,
-        weight=0.3,  # 保持1秒可获得0.12的额外奖励
+        weight=5,  # 保持1秒可获得0.12的额外奖励
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names=["link6"]),  # 使用link6而不是MISSING
             "command_name": "ee_pose",

@@ -88,7 +88,7 @@ case "$TASK_TYPE" in
             ${EXTRA_ARGS}
         ;;
     
-    reach-ik)
+    reach-ik|ik)
         echo -e "${GREEN}启动ARM-T Reach-IK任务训练 - WandB集成${NC}"
         python ${PROJECT_ROOT}/scripts/rsl_rl/train_wandb_reach_ik.py \
             --task ARM-T-Reach-IK-v0 \

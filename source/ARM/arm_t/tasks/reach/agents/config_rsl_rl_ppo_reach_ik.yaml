@@ -3,23 +3,23 @@
 
 # 基础配置
 seed: 42
-num_envs: 2048
+num_envs: 4096  
 max_iterations: 1000
 save_interval: 500
 
 # Policy network
 init_noise_std: 0.3
-actor_hidden_dims: [128, 128]
-critic_hidden_dims: [128, 128]
+actor_hidden_dims: [256, 128]
+critic_hidden_dims: [256, 128]
 activation: "relu"
 
 # PPO algorithm
-num_steps_per_env: 24
+num_steps_per_env: 36
 num_learning_epochs: 8
-num_mini_batches: 64
-learning_rate: 0.002
+num_mini_batches: 512
+learning_rate: 0.001
 schedule: "adaptive"
-gamma: 0.99
+gamma: 0.95
 lam: 0.95
 entropy_coef: 0.005
 clip_param: 0.1

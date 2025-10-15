@@ -819,12 +819,9 @@ parameters:
 1. **Isaac Lab官方文档**：https://isaac-sim.github.io/IsaacLab/
 2. **Stable-Baselines3文档**：https://stable-baselines3.readthedocs.io/
 3. **RL Baselines3 Zoo超参数**：https://github.com/DLR-RM/rl-baselines3-zoo
-4. **项目GitHub**：（填入您的仓库链接）
 
 ---
 
-**文档版本**：1.0  
-**更新日期**：2024年10月  
 **联系方式**：2186808025@qq.com
 
 

@@ -49,7 +49,7 @@ class ArmTReachPPORunnerCfg(RslRlOnPolicyRunnerCfg):
 
 @configclass
 class ArmTReachIKPPORunnerCfg(RslRlOnPolicyRunnerCfg):
-    num_steps_per_env = 24
+    num_steps_per_env = 36 # 增加采样步数提升数据利用效率
     max_iterations = 1000
     save_interval = 500  # 每500次迭代保存一次模型
     experiment_name = "arm_t_reach_ik"
@@ -58,8 +58,8 @@ class ArmTReachIKPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     empirical_normalization = True  # 启用归一化以稳定训练
     policy = RslRlPpoActorCriticCfg(
         init_noise_std=0.3,  # 大幅降低初始噪声
-        actor_hidden_dims=[128, 128],
-        critic_hidden_dims=[128, 128],
+        actor_hidden_dims=[256, 128],
+        critic_hidden_dims=[512, 128], # 增强网络容量
         activation="relu",
     )
     algorithm = RslRlPpoAlgorithmCfg(
@@ -68,10 +68,10 @@ class ArmTReachIKPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         clip_param=0.1,  # 极度保守的策略更新
         entropy_coef=0.005,  # 增加熵系数以鼓励探索
         num_learning_epochs=8,
-        num_mini_batches=64,  # 增加mini-batch以获得更稳定的梯度
-        learning_rate=2.0e-3,  # 极低学习率防止崩溃
+        num_mini_batches=512, # 增加mini-batch数量匹配更大的环境数
+        learning_rate=1.0e-3,  # 极低学习率防止崩溃
         schedule="adaptive",
-        gamma=0.99,
+        gamma=0.95, # 降低折扣因子关注短期奖励
         lam=0.95,
         desired_kl=0.01,  # 更严格的KL散度限制
         max_grad_norm=0.5,  # 极严格的梯度裁剪

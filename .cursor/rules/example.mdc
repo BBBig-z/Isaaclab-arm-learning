@@ -1,5 +1,5 @@
 ---
-description: 我的项目运行环境在conda中的(isaaclab_env)
+description: 我的项目运行环境在conda中的(isaaclab_env),项目说明为/home/y/works/rl/isaac_arm/readme.md
 globs: 用中文回答问题
 alwaysApply: true
 ---
