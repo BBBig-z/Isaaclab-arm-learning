@@ -468,7 +468,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="ARM-T 可达位姿数据库生成工具 - ROS2 + MoveIt2"
     )
-    parser.add_argument('--num_samples', type=int, default=10000,
+    parser.add_argument('--num_samples', type=int, default=7000,
                        help='目标样本数量 (默认: 10000)')
     parser.add_argument('--output', type=str, default=None,
                        help='输出文件路径')

@@ -40,24 +40,44 @@ class ArmTReachEnvCfg(ReachEnvCfg):
         self.scene.robot = ARM_T_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
 
         # override rewards - using link6 as end effector (last joint)
-        # 注意：对于关节位置控制，我们追踪 link6，实际的夹爪位置会在前方约10cm
-        self.rewards.end_effector_position_tracking.params["asset_cfg"].body_names = ["link6"]
-        self.rewards.end_effector_position_tracking_fine_grained.params["asset_cfg"].body_names = ["link6"]
-        self.rewards.end_effector_orientation_tracking.params["asset_cfg"].body_names = ["link6"]
+        # 注意：对于关节位置控制，我们追踪 link6
+        # 实际的夹爪位置会在前方约10cm
+        body_names = ["link6"]
+        self.rewards.end_effector_position_tracking.params[
+            "asset_cfg"
+        ].body_names = body_names
+        self.rewards.end_effector_position_tracking_fine_grained.params[
+            "asset_cfg"
+        ].body_names = body_names
+        self.rewards.end_effector_orientation_tracking.params[
+            "asset_cfg"
+        ].body_names = body_names
+        self.rewards.ee_velocity_penalty.params[
+            "asset_cfg"
+        ].body_names = body_names
 
         # override actions - 6 DOF arm joints only
         self.actions.arm_action = mdp.JointPositionActionCfg(
             asset_name="robot",
-            joint_names=["joint1", "joint2", "joint3", "joint4", "joint5", "joint6"],
+            joint_names=[
+                "joint1", "joint2", "joint3",
+                "joint4", "joint5", "joint6"
+            ],
             scale=0.3,
             use_default_offset=True,
         )
         # Gripper stays at default position via PD control (no action needed)
 
-        # IMPORTANT: Override observations to only observe the 6 arm joints (not gripper joints)
+        # IMPORTANT: Override observations to only observe the 6 arm joints
+        # (not gripper joints)
         # This prevents NaN/Inf from uncontrolled gripper joints
-        self.observations.policy.joint_pos.params = {"asset_cfg": SceneEntityCfg("robot", joint_ids=[0, 1, 2, 3, 4, 5])}
-        self.observations.policy.joint_vel.params = {"asset_cfg": SceneEntityCfg("robot", joint_ids=[0, 1, 2, 3, 4, 5])}
+        joint_ids = [0, 1, 2, 3, 4, 5]
+        self.observations.policy.joint_pos.params = {
+            "asset_cfg": SceneEntityCfg("robot", joint_ids=joint_ids)
+        }
+        self.observations.policy.joint_vel.params = {
+            "asset_cfg": SceneEntityCfg("robot", joint_ids=joint_ids)
+        }
 
         # override command generator body
         # end-effector is link6 with offset to gripper tip (夹爪最前端)

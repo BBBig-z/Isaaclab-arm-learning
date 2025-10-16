@@ -305,12 +305,12 @@ if [ ${#TRAIN_LOGS_DIRS[@]} -gt 0 ] || [ ${#TRAIN_OUTPUT_DIRS[@]} -gt 0 ]; then
         
         for dir in "${TRAIN_LOGS_DIRS[@]}"; do
             echo "  删除: $dir"
-            rm -rf "$dir"
+            trash-put "$dir"
         done
         
         for dir in "${TRAIN_OUTPUT_DIRS[@]}"; do
             echo "  删除: $dir"
-            rm -rf "$dir"
+            trash-put "$dir"
         done
         
         echo -e "\033[0;32m✓ 训练文件已删除\033[0m"

@@ -141,7 +141,11 @@ class RewardsCfg:
     end_effector_position_tracking_fine_grained = RewTerm(
         func=mdp.position_command_error_tanh,
         weight=2,  # 提高精细位置奖励（0.1 → 0.28）
-        params={"asset_cfg": SceneEntityCfg("robot", body_names=MISSING), "std": 0.1, "command_name": "ee_pose"},
+        params={
+            "asset_cfg": SceneEntityCfg("robot", body_names=MISSING),
+            "std": 0.1,
+            "command_name": "ee_pose",
+        },
     )
     
     # 分段姿态惩罚：误差大时惩罚大，误差小时惩罚小
@@ -151,9 +155,9 @@ class RewardsCfg:
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names=MISSING),
             "command_name": "ee_pose",
-            "threshold": 0.4,
+            "threshold": 0.23,
             "large_error_weight": 1.0,  # 大误差时：权重×1.0（全惩罚）
-            "small_error_weight": 0.15,  # 小误差时：权重×0.6（降低40%）
+            "small_error_weight": 0.1,  # 小误差时：权重×0.6（降低40%）
         },
     )
 
@@ -161,7 +165,7 @@ class RewardsCfg:
     action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.0001)  # 原始权重
     joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
-        weight=-0.02,  # 原始权重
+        weight=-0.08,  # 原始权重
         params={"asset_cfg": SceneEntityCfg("robot")},
     )
     
@@ -173,8 +177,57 @@ class RewardsCfg:
             "asset_cfg": SceneEntityCfg("robot", body_names=["link6"]),  # 使用link6而不是MISSING
             "command_name": "ee_pose",
             "position_threshold": 0.05,  # 位置容差6cm
-            "orientation_threshold": 0.35,  # 姿态容差10度
-            "hold_time": 2,  # 保持1秒
+            "orientation_threshold": 0.2,  # 姿态容差10度
+            "hold_time": 1.5,  # 保持1秒
+        },
+    )
+    
+    # === 新增：稳定性奖励项 ===
+    # 末端执行器速度惩罚（指数形式）- 鼓励在目标处保持静止
+    # 仅在接近目标时生效
+    ee_velocity_penalty = RewTerm(
+        func=arm_mdp.ee_velocity_exp,
+        weight=0.5,  # 正权重，因为函数返回的是奖励（速度低时奖励高）
+        params={
+            "command_name": "ee_pose",
+            "asset_cfg": SceneEntityCfg("robot", body_names=MISSING),
+            "std_lin": 0.02,  # 线性速度标准差（m/s）
+            "std_ang": 0.1,  # 角速度标准差（rad/s）
+            "position_threshold": 0.07,  # 10cm内才生效
+            "orientation_threshold": 0.3,  # 约17度内才生效
+        },
+    )
+    
+    # 关节速度惩罚（L1范数）- 替代joint_vel_l2的另一种选择
+    joint_vel_l1_penalty = RewTerm(
+        func=arm_mdp.joint_vel_l1,
+        weight=-0.02,  # 负权重，惩罚关节速度
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot", joint_ids=[0, 1, 2, 3, 4, 5]
+            )
+        },
+    )
+    
+    # 关节扭矩惩罚（L2范数）- 鼓励能量高效的控制
+    joint_torques_penalty = RewTerm(
+        func=arm_mdp.joint_torques_l2,
+        weight=-0.002,  # 负权重，惩罚高扭矩
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot", joint_ids=[0, 1, 2, 3, 4, 5]
+            )
+        },
+    )
+    
+    # 关节加速度惩罚（L2范数）- 鼓励平滑运动，避免振荡
+    joint_acc_penalty = RewTerm(
+        func=arm_mdp.joint_acc_l2,
+        weight=-0.0002,  # 负权重，惩罚高加速度
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot", joint_ids=[0, 1, 2, 3, 4, 5]
+            )
         },
     )
 
@@ -191,11 +244,11 @@ class CurriculumCfg:
     """Curriculum terms for the MDP."""
 
     action_rate = CurrTerm(
-        func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -0.005, "num_steps": 10000}  # 延长课程学习阶段（4500 → 10000）
+        func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -0.12, "num_steps": 1500}
     )
 
     joint_vel = CurrTerm(
-        func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -0.001, "num_steps": 10000}  # 延长课程学习阶段（4500 → 10000）
+        func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -0.17, "num_steps": 1500}
     )
 
 
