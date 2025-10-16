@@ -121,7 +121,7 @@ class ReachablePoseGenerator(Node):
         self.workspace_bounds = {
             'x': (0.10, 0.35),
             'y': (-0.20, 0.20),
-            'z': (0.10, 0.40)
+            'z': (0.20, 0.40)
         }
         
         self.get_logger().info(f'机器人: {robot_name}')

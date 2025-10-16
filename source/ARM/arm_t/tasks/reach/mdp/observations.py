@@ -20,8 +20,8 @@ def is_target_reached(
     env: ManagerBasedRLEnv,
     command_name: str,
     asset_cfg: SceneEntityCfg,
-    position_threshold: float = 0.06,  # 6cm
-    orientation_threshold: float = 0.175,  # 10度
+    position_threshold: float = 0.015,  # 1cm
+    orientation_threshold: float = 0.1,  # 12度
 ) -> torch.Tensor:
     """判断是否到达目标（用于统计成功率）
     
